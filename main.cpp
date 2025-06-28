@@ -51,17 +51,17 @@ int main(int argc, char** argv) {
 
 	m.loadObject("diablo3_pose.obj");
 
-	std::cout<<m.ind.size()<<std::endl;
+	std::cout<<m.vertex_inds.size()<<std::endl;
 	std::cout<<m.vert.size()<<std::endl;
 
-	for(const auto& ind : m.ind){
+	for(const auto& ind : m.vertex_inds){
 		//std::cout<<"Triangle with vertex index:"<<ind[0]<<" "<<ind[1]<<" "<<ind[2]<<" "<<std::endl;
 
 		for(int i = 0;i < 3;i++){
 
 			//obj f的index要减1
-			std::vector<float> v1 = m.vert[ind[i] - 1];
-			std::vector<float> v2 = m.vert[ind[(i+1)%3] - 1];
+			Vector3f v1 = m.vert[ind[i]];
+			Vector3f v2 = m.vert[ind[(i+1)%3]];
 			float ax,ay,bx,by;
 
 			ax = std::round((v1[0]*0.5 + 0.5)*1024);

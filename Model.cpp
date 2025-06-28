@@ -3,23 +3,7 @@
 #include <string>
 #include <sstream>
 #include <iostream>
-
-std::vector<std::string> split(std::string s,std::string delimiter){
-    std::vector<std::string> result;
-    size_t pos_start = 0, pos_end;
-
-    while((pos_end = s.find(delimiter, pos_start)) != std::string::npos){
-       std::string token = s.substr(pos_start, pos_end - pos_start);
-       result.push_back(token);
-       pos_start = pos_end + delimiter.length();
-    }
-    
-    if(pos_start < s.length()){
-        result.push_back(s.substr(pos_start, s.length() - pos_start));
-    }
-
-    return result;
-}
+#include "utils.h"
 
 bool Model::loadObject(std::string filename){
     std::ifstream inputFile(filename);
@@ -55,21 +39,16 @@ bool Model::loadObject(std::string filename){
         // }  
 
         if(tokens[0].compare("v") == 0){
-            std::vector<float> vertex;
-
-            for(int i = 1;i < 4;i++){
-                vertex.push_back(std::stof(tokens[i])); 
-            }
-
-            vert.push_back(std::move(vertex));
+            vert.push_back(Vector3f(std::stof(tokens[1]),
+                                    std::stof(tokens[2]),
+                                    std::stof(tokens[3])));
         } else if(tokens[0].compare("f") == 0){
-            std::vector<int> temp_ind;
+            Vector3i vertex_ind;
             for(int i = 1;i < 4;i++){
                 std::vector<std::string> ts = split(tokens[i], "/");
-                temp_ind.push_back(std::stoi(ts[0]));
+                vertex_ind[i-1] = std::stoi(ts[0]) - 1;
             }
-
-            ind.push_back(std::move(temp_ind));
+            vertex_inds.push_back(vertex_ind);
         }
 
     }
