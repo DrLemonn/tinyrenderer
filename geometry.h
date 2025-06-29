@@ -113,11 +113,27 @@ Vec<N,T> operator-(const Vec<N,T>& a, const Vec<N,T>& b){
 }
 
 template<size_t N, typename T>
+Vec<N,T> operator-(const Vec<N,T>& a){
+    Vec<N,T> result;
+    for(size_t i = 0;i < N;i++) {result[i] = -a[i];}
+    return result;
+}
+
+template<size_t N, typename T>
 Vec<N,T> operator*(const Vec<N,T>& a, T scalar){
     Vec<N,T> result;
     for(size_t i = 0;i < N;i++){result[i] = a[i]*scalar;}    
     return result;
 }
+
+// 向量点积 (Dot Product)
+template <size_t N, typename T>
+T operator*(const Vec<N, T>& lhs, const Vec<N, T>& rhs) {
+    T result = T();
+    for (size_t i = 0; i < N; i++) result += lhs[i] * rhs[i];
+    return result;
+}
+
 
 template<size_t N, typename T>
 Vec<N,T> operator/(const Vec<N,T>& a, T scalar){
@@ -146,6 +162,11 @@ Vec<3,T> cross(const Vec<3,T>& a, const Vec<3,T>& b){
 template<typename T>
 Vec<4,T> toVec4(const Vec<3,T>& v, T w = 1.0f) {
     return Vec<4,T>{v.x, v.y, v.z, w};
+}
+
+template<typename T>
+Vec<3,T> toVec3(const Vec<4,T>& v){
+    return Vec<3,T>(v.x, v.y, v.z);
 }
 
 template<size_t N, typename T>
