@@ -36,6 +36,7 @@ struct TGAImage {
     void flip_vertically();
     TGAColor get(const int x, const int y) const;
     void set(const int x, const int y, const TGAColor &c);
+	void clear();
     int width()  const;
     int height() const;
 private:

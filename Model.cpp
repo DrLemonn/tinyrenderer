@@ -28,16 +28,6 @@ bool Model::loadObject(std::string filename){
             tokens.push_back(token);
         }
 
-        // if(tokens.size() != 4){
-        //     std::cerr << "not valid obj file format" <<std::endl;
-        //     std::cerr << "the tokens are :";
-        //     for(const auto& token : tokens){
-        //         std::cerr<<token<<" ";
-        //     }
-        //     std::cerr<<std::endl;
-        //     return false;   
-        // }  
-
         if(tokens[0].compare("v") == 0){
             vert.push_back(Vector3f(std::stof(tokens[1]),
                                     std::stof(tokens[2]),

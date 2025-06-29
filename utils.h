@@ -2,21 +2,12 @@
 
 #include <vector>
 #include <string>
+#include "geometry.h"
 
+std::vector<std::string> split(std::string s, std::string delimiter);
 
-std::vector<std::string> split(std::string s,std::string delimiter){
-    std::vector<std::string> result;
-    size_t pos_start = 0, pos_end;
+float computeSignedArea(Vector2f v1, Vector2f v2);
 
-    while((pos_end = s.find(delimiter, pos_start)) != std::string::npos){
-       std::string token = s.substr(pos_start, pos_end - pos_start);
-       result.push_back(token);
-       pos_start = pos_end + delimiter.length();
-    }
-    
-    if(pos_start < s.length()){
-        result.push_back(s.substr(pos_start, s.length() - pos_start));
-    }
+std::tuple<float, float, float> computeBarycentric2D(float x, float y, const Vector3f &a, const Vector3f &b, const Vector3f &c);
 
-    return result;
-}
+bool insideTriangle(float x, float y, Vector3f a, Vector3f b, Vector3f c);
