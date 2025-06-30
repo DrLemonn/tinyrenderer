@@ -138,7 +138,7 @@ void rasterizer::rasterize_triangle(Vector4f a, Vector4f b, Vector4f c, IShader&
 
 				if(z_interpolated < depthbuffer[index]){
                     TGAColor color{};
-                    bool ignore = shader.fragment({alpha, beta, gamma}, color);
+                    bool ignore = shader.fragment({alpha, beta, gamma}, color);                
 
                     if(!ignore){
                         depthbuffer[index] = z_interpolated;
@@ -153,5 +153,6 @@ void rasterizer::rasterize_triangle(Vector4f a, Vector4f b, Vector4f c, IShader&
 
 void rasterizer::write_tga_file(std::string filename)
 {
+    framebuffer.flip_vertically();
     framebuffer.write_tga_file(filename.c_str()); 
 }

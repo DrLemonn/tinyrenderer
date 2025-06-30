@@ -27,8 +27,8 @@ struct GouraudShader : IShader{
     Vector3f varing_intensity;
 
     Vector4f vertex(int face_index, int vert_index) override {
-        Vector3f v_pos = m->vert[(m->vertex_inds)[face_index][vert_index] - 1];
-        Vector3f normal = m->norm[(m->norm_inds)[face_index][vert_index] - 1];
+        Vector3f v_pos = m->vert[(m->vertex_inds)[face_index][vert_index]];
+        Vector3f normal = m->norm[(m->norm_inds)[face_index][vert_index]];
 
         varing_intensity[vert_index] = std::max(0.f, normal * lightDir);
         return viewportMatrix * projectionMatrix * viewMatrix * modelMatrix * toVec4(v_pos);
@@ -36,7 +36,7 @@ struct GouraudShader : IShader{
 
     bool fragment(Vector3f bar, TGAColor& color) override {
         float intensity = bar * varing_intensity;
-        color = TGAColor(0, 0, 255); // well duh
+        color = TGAColor(255, 255, 255) * intensity; // well duh
         return false; 
     }
 };

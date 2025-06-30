@@ -22,7 +22,7 @@ int main(int argc, char** argv) {
         m.loadObject("obj/african_head.obj");
     }
 
-	Vector3f eye_pos{0.f, 2.0f, 5.f}, centre{0.f, 0.f, 0.f}, up{0.f, 1.f, 0.f};
+	Vector3f eye_pos{1.f, 1.0f, 3.f}, centre{0.f, 0.f, 0.f}, up{0.f, 1.f, 0.f};
 
 	GouraudShader shader;
 
@@ -31,7 +31,8 @@ int main(int argc, char** argv) {
 	shader.viewMatrix = r.lookAt(eye_pos, centre, up);
 	shader.projectionMatrix= r.getProjectionMatrix(45.f, 1.f, -0.1f, -50.f);
 	shader.viewportMatrix = r.getViewportMatrix();
-	shader.lightDir = Vector3f{0.f, 0.f, 1.f};
+	shader.lightDir = Vector3f{1.f, 1.f, 1.f};
+	shader.lightDir.normalize();
 
 	for(int face_index = 0;face_index < m.vertex_inds.size();face_index++){
 		Vector4f a,b,c;
