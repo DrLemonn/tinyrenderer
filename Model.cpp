@@ -4,12 +4,11 @@
 #include <iostream>
 #include "utils.h"
 
-bool Model::loadObject(std::string filename){
+void Model::loadObject(std::string filename){
     std::ifstream inputFile(filename);
 
     if(!inputFile.is_open()){
         std::cerr << "Can't open file" <<std::endl;
-        return false;
     }
 
     std::string s;
@@ -58,42 +57,50 @@ bool Model::loadObject(std::string filename){
     std::cerr << "# v# " << vert.size() << " f# "  << vertex_inds.size() << " vt# " << uv.size() << " vn# " << norm.size() << std::endl;
 
 
-    loadTexture(filename, "_diffuse.tga", diffuse_img);
-    loadTexture(filename, "_nm.tga",      normal_img);
-    loadTexture(filename, "_spec.tga",    specular_img);
-}
-
-
-
-void Model::loadTexture(std::string filename, std::string suffix, TGAImage img)
-{
-    std::string texfile(filename);
-    size_t dot = texfile.find_last_of(".");
-    if (dot!=std::string::npos) {
-        texfile = texfile.substr(0,dot) + suffix;
+    auto load_texture = [&filename](const std::string suffix, TGAImage &img) {
+        size_t dot = filename.find_last_of(".");
+        if (dot==std::string::npos) return;
+        std::string texfile = filename.substr(0,dot) + suffix;
         std::cerr << "texture file " << texfile << " loading " << (img.read_tga_file(texfile.c_str()) ? "ok" : "failed") << std::endl;
         img.flip_vertically();
-    }
+    };
+    load_texture("_diffuse.tga",    diffuse_img );
+    load_texture("_nm_tangent.tga", normal_img  );
+    load_texture("_spec.tga",       specular_img);
 }
 
 TGAColor Model::diffuse(Vector2f uv)
 {
-    return diffuse_img.get(std::floor(uv.x * diffuse_img.get_width()), std::floor(uv.y * diffuse_img.get_height()));
+    return diffuse_img.get(std::floor(uv.x * diffuse_img.width()), std::floor(uv.y * diffuse_img.height()));
 }
 
 TGAColor Model::specular(Vector2f uv)
 {
-    return specular_img.get(std::floor(uv.x * diffuse_img.get_width()), std::floor(uv.y * diffuse_img.get_height()));
+    return specular_img.get(std::floor(uv.x * diffuse_img.width()), std::floor(uv.y * diffuse_img.height()));
 }
 
 Vector3f Model::normal(Vector2f uv)
 {      
     Vector3f result;
-    TGAColor n = normal_img.get(std::floor(uv.x * diffuse_img.get_width()), std::floor(uv.y * diffuse_img.get_height()));
+    TGAColor n = normal_img.get(std::floor(uv.x * diffuse_img.width()), std::floor(uv.y * diffuse_img.height()));
 
     for(int i = 0;i < 3;i++){
         result[2 - i] =  static_cast<float>(n[i])/255.f * 2.f - 1.f;
     }
     
     return result;
+}
+
+Vector3f Model::getVertex(int face_index, int vert_index){
+    return vert[vertex_inds[face_index][vert_index]];
+}
+
+Vector3f Model::getNormal(int face_index, int vert_index)
+{
+    return norm[norm_inds[face_index][vert_index]];
+}
+
+Vector2f Model::getuv(int face_index, int vert_index)
+{
+    return uv[uv_inds[face_index][vert_index]];
 }

@@ -7,11 +7,13 @@
 
 class Model{
     public:
-    bool loadObject(std::string filename);
-    void loadTexture(std::string filename, std::string suffix, TGAImage texture);
+    void loadObject(std::string filename);
     TGAColor diffuse(Vector2f uv);
     TGAColor specular(Vector2f uv);
     Vector3f normal(Vector2f uv); 
+    Vector3f getVertex(int face_index, int vert_index);
+    Vector3f getNormal(int face_index, int vert_index);
+    Vector2f getuv(int face_index, int vert_index);
 
     std::vector<Vector3i> vertex_inds;
     std::vector<Vector3i> norm_inds;
@@ -22,5 +24,8 @@ class Model{
     TGAImage diffuse_img;
     TGAImage specular_img;
     TGAImage normal_img;
-    //std::vector<Triangle> triangles; 
+
+
+
+    // std::vector<Triangle> triangles;
 };

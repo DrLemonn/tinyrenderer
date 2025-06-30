@@ -26,13 +26,16 @@ int main(int argc, char** argv) {
 
 	GouraudShader shader;
 
+	Matrix4f modelView = r.lookAt(eye_pos, centre, up) * r.getModelMatrix(0);
+
 	shader.m = &m;
-	shader.modelMatrix = r.getModelMatrix(0);
-	shader.viewMatrix = r.lookAt(eye_pos, centre, up);
+	shader.modelViewMatrix = modelView;
+	shader.modelViewInverTrans = modelView.inverse().transpose();
 	shader.projectionMatrix= r.getProjectionMatrix(45.f, 1.f, -0.1f, -50.f);
 	shader.viewportMatrix = r.getViewportMatrix();
 	shader.lightDir = Vector3f{1.f, 1.f, 1.f};
 	shader.lightDir.normalize();
+	shader.eyePos = eye_pos;
 
 	for(int face_index = 0;face_index < m.vertex_inds.size();face_index++){
 		Vector4f a,b,c;
@@ -42,7 +45,6 @@ int main(int argc, char** argv) {
 
 		r.rasterize_triangle(a,b,c, shader);
 	}
-	//framebuffer.flip_vertically();
 	// 保存图像
 	r.write_tga_file("wired_frame.tga");
 

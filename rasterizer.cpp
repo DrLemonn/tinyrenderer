@@ -153,6 +153,6 @@ void rasterizer::rasterize_triangle(Vector4f a, Vector4f b, Vector4f c, IShader&
 
 void rasterizer::write_tga_file(std::string filename)
 {
-    framebuffer.flip_vertically();
+    //framebuffer.flip_vertically();
     framebuffer.write_tga_file(filename.c_str()); 
 }
