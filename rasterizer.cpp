@@ -107,8 +107,14 @@ Matrix4f rasterizer::getViewportMatrix(){
 	return viewport;
 }
 
-void rasterizer::rasterize_triangle(Vector4f a, Vector4f b, Vector4f c, TGAColor color){
-	// compute bounding box
+void rasterizer::rasterize_triangle(Vector4f a, Vector4f b, Vector4f c, IShader& shader){
+	// 传过来的abc还没有做除以w，利用w的值来做透视矫正插值
+    Vector3f w{a.w, b.w, c.w};
+    a = a/w[0];
+    b = b/w[1];
+    c = c/w[2];
+    
+    // compute bounding box
 	int bbminx = std::floor(std::min(a.x, std::min(b.x, c.x)));
 	int bbmaxx = std::floor(std::max(a.x, std::max(b.x, c.x)));
 	int bbminy = std::floor(std::min(a.y, std::min(b.y, c.y)));
@@ -121,12 +127,24 @@ void rasterizer::rasterize_triangle(Vector4f a, Vector4f b, Vector4f c, TGAColor
 			if(insideTriangle(x, y, toVec3(a), toVec3(b), toVec3(c))){
 				int index = getIndex(i,j);
 				
-				auto [alpha, beta, gamma] = computeBarycentric2D(x, y, toVec3(a), toVec3(b), toVec3(c));
-				float z_interpolated = alpha * a.z + beta * b.z + gamma * c.z;
+                // 详见barycentric coordinate笔记
+				auto [alpha_prime, beta_prime, gamma_prime] = computeBarycentric2D(x, y, toVec3(a), toVec3(b), toVec3(c));
+				float k = 1.f/(alpha_prime/w[0] + beta_prime/w[1] + gamma_prime/w[2]);
+                float alpha = k * alpha_prime / w[0];
+                float beta = k * beta_prime / w[1];
+                float gamma = k * gamma_prime / w[2];
+                
+                float z_interpolated = alpha * a.z + beta * b.z + gamma * c.z;
 
 				if(z_interpolated < depthbuffer[index]){
-					depthbuffer[index] = z_interpolated;
-					framebuffer.set(i, j, color);
+                    TGAColor color{};
+                    bool ignore = shader.fragment({alpha, beta, gamma}, color);
+
+                    if(!ignore){
+                        depthbuffer[index] = z_interpolated;
+					    framebuffer.set(i, j, color);     
+                    }
+
 				}
 			}
 		}
@@ -135,5 +153,5 @@ void rasterizer::rasterize_triangle(Vector4f a, Vector4f b, Vector4f c, TGAColor
 
 void rasterizer::write_tga_file(std::string filename)
 {
-    framebuffer.write_tga_file(filename); 
+    framebuffer.write_tga_file(filename.c_str()); 
 }

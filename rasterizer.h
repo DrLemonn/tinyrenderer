@@ -1,9 +1,45 @@
 #pragma once
 #include "tgaimage.h"
 #include "geometry.h"
+#include "Model.h"
+#include "tgaimage.h"
 
 
 extern const float PI;
+
+
+struct IShader{
+    virtual ~IShader() = default;
+    virtual Vector4f vertex(int face_index, int vert_index) = 0;
+    virtual bool fragment(Vector3f bar, TGAColor& color) = 0;
+};
+
+struct GouraudShader : IShader{
+    // --- "Uniforms" ---
+    Model* m = nullptr;
+    Matrix4f modelMatrix;
+    Matrix4f viewMatrix;
+    Matrix4f projectionMatrix;
+    Matrix4f viewportMatrix;
+    Vector3f lightDir;
+
+    // --- "Varying" ---
+    Vector3f varing_intensity;
+
+    Vector4f vertex(int face_index, int vert_index) override {
+        Vector3f v_pos = m->vert[(m->vertex_inds)[face_index][vert_index] - 1];
+        Vector3f normal = m->norm[(m->norm_inds)[face_index][vert_index] - 1];
+
+        varing_intensity[vert_index] = std::max(0.f, normal * lightDir);
+        return viewportMatrix * projectionMatrix * viewMatrix * modelMatrix * toVec4(v_pos);
+    }
+
+    bool fragment(Vector3f bar, TGAColor& color) override {
+        float intensity = bar * varing_intensity;
+        color = TGAColor(0, 0, 255); // well duh
+        return false; 
+    }
+};
 
 struct rasterizer{
     int width;
@@ -24,7 +60,7 @@ struct rasterizer{
     Matrix4f lookAt(Vector3f eye_pos, Vector3f centre, Vector3f up);
     Matrix4f getViewportMatrix();
     Matrix4f getProjectionMatrix(float eye_fov, float aspect_ratio, float zNear, float zFar);
-    void rasterize_triangle(Vector4f a, Vector4f b, Vector4f c, TGAColor color);
+    void rasterize_triangle(Vector4f a, Vector4f b, Vector4f c, IShader& shader);
     void write_tga_file(std::string filename);
 };
 
