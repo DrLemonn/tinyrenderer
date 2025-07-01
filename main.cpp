@@ -19,7 +19,7 @@ int main(int argc, char** argv) {
 	if (2==argc) {
         m.loadObject(argv[1]);
     } else {
-        m.loadObject("obj/african_head.obj");
+        m.loadObject("obj/diablo3_pose.obj");
     }
 
 	Vector3f eye_pos{1.f, 1.0f, 3.f}, centre{0.f, 0.f, 0.f}, up{0.f, 1.f, 0.f};
@@ -43,7 +43,7 @@ int main(int argc, char** argv) {
 		b = shader.vertex(face_index, 1);
 		c = shader.vertex(face_index, 2);
 
-		r.rasterize_triangle(a,b,c, shader);
+		r.rasterize_triangle(a,b,c, shader, r.framebuffer, r.depthbuffer);
 	}
 	// 保存图像
 	r.write_tga_file("wired_frame.tga");

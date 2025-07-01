@@ -107,7 +107,7 @@ Matrix4f rasterizer::getViewportMatrix(){
 	return viewport;
 }
 
-void rasterizer::rasterize_triangle(Vector4f a, Vector4f b, Vector4f c, IShader& shader){
+void rasterizer::rasterize_triangle(Vector4f a, Vector4f b, Vector4f c, IShader& shader, TGAImage& framebuffer, std::vector<float>& depthbuffer){
 	// 传过来的abc还没有做除以w，利用w的值来做透视矫正插值
     Vector3f w{a.w, b.w, c.w};
     a = a/w[0];

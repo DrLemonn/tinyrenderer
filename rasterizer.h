@@ -45,37 +45,43 @@ struct GouraudShader : IShader{
         // float intensity = bar * varing_intensity;
         // color = TGAColor(255, 255, 255) * intensity; // well duh
         Vector3f p = varing_position * bar;
-        //Vector3f n = varing_normal * bar;
+        Vector3f n_model = varing_normal * bar;
         Vector2f uv = varing_uv * bar;
         
-        //Vector3f n_tan = m->normal(uv);
+        Vector3f n_tan = m->normal(uv);
 
-        // // compute TBN matrix 
-        // // E1 = AB E2 = AC
-        // // [E1 E2] = [T B][ue1  ue2]
-        // //                [ve1  ve2] 
+        // compute TBN matrix 
+        // E1 = AB E2 = AC
+        // [E1 E2] = [T B][ue1  ue2]
+        //                [ve1  ve2] 
 
-        // //compute [ue1  ue2]-1
-        // //        [ve1  ve2] 
-        // Matrix<2, 2, float> temp_matrix;
-        // temp_matrix.set_col(0, varing_uv.col(1) - varing_uv.col(0));
-        // temp_matrix.set_col(1, varing_uv.col(2) - varing_uv.col(0));
-        // temp_matrix = temp_matrix.inverse();
+        //compute [ue1  ue2]-1
+        //        [ve1  ve2] 
+        Matrix<2, 2, float> temp_matrix;
+        temp_matrix.set_col(0, varing_uv.col(1) - varing_uv.col(0));
+        temp_matrix.set_col(1, varing_uv.col(2) - varing_uv.col(0));
+        temp_matrix = temp_matrix.inverse();
 
-        // Matrix<3, 2, float> TB;
-        // // set [E1 E2] 
-        // TB.set_col(0, varing_position.col(1) - varing_position.col(0));
-        // TB.set_col(1, varing_position.col(2) - varing_position.col(0));
-        // TB = TB * temp_matrix;
+        Matrix<3, 2, float> TB;
+        // set [E1 E2] 
+        TB.set_col(0, varing_position.col(1) - varing_position.col(0));
+        TB.set_col(1, varing_position.col(2) - varing_position.col(0));
+        TB = TB * temp_matrix;
 
-        // Matrix3f TBN;
-        // TBN.set_col(0, TB.col(0).normalize());
-        // TBN.set_col(1, TB.col(1).normalize());
-        // TBN.set_col(2, cross(TBN.col(0), TBN.col(1)));
+        Vector3f T = TB.col(0);
+        Vector3f B = TB.col(1);
 
-        //Vector3f n = TBN * n_tan;
+        // 这里需要正交化，建立n_model对应切空间中z轴的正交坐标系
 
-        Vector3f n = m->normal(uv);
+        Vector3f T_ortho = (T - n_model * (T * n_model)).normalize();
+        Vector3f B_ortho = cross(n_model, T_ortho).normalize();
+
+        Matrix3f TBN;
+        TBN.set_col(0, T_ortho);
+        TBN.set_col(1, B_ortho);
+        TBN.set_col(2, n_model);
+
+        Vector3f n = TBN * n_tan;
 
         Vector3f l = lightDir.normalize();
         Vector3f v = (eyePos - p).normalize();
@@ -114,7 +120,7 @@ struct rasterizer{
     Matrix4f lookAt(Vector3f eye_pos, Vector3f centre, Vector3f up);
     Matrix4f getViewportMatrix();
     Matrix4f getProjectionMatrix(float eye_fov, float aspect_ratio, float zNear, float zFar);
-    void rasterize_triangle(Vector4f a, Vector4f b, Vector4f c, IShader& shader);
+    void rasterize_triangle(Vector4f a, Vector4f b, Vector4f c, IShader& shader, TGAImage& framebuffer, std::vector<float>& depthbuffer);
     void write_tga_file(std::string filename);
 };
 

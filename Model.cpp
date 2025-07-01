@@ -65,9 +65,8 @@ void Model::loadObject(std::string filename){
         img.flip_vertically();
     };
     load_texture("_diffuse.tga",    diffuse_img );
-    //load_texture("_nm_tangent.tga", normal_img  );
-    load_texture("_nm.tga", normal_img  );
-
+    load_texture("_nm_tangent.tga", normal_img  );
+    //load_texture("_nm.tga", normal_img  );
     load_texture("_spec.tga",       specular_img);
 }
 
