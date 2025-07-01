@@ -45,8 +45,37 @@ struct GouraudShader : IShader{
         // float intensity = bar * varing_intensity;
         // color = TGAColor(255, 255, 255) * intensity; // well duh
         Vector3f p = varing_position * bar;
-        Vector3f n = varing_normal * bar;
+        //Vector3f n = varing_normal * bar;
         Vector2f uv = varing_uv * bar;
+        
+        //Vector3f n_tan = m->normal(uv);
+
+        // // compute TBN matrix 
+        // // E1 = AB E2 = AC
+        // // [E1 E2] = [T B][ue1  ue2]
+        // //                [ve1  ve2] 
+
+        // //compute [ue1  ue2]-1
+        // //        [ve1  ve2] 
+        // Matrix<2, 2, float> temp_matrix;
+        // temp_matrix.set_col(0, varing_uv.col(1) - varing_uv.col(0));
+        // temp_matrix.set_col(1, varing_uv.col(2) - varing_uv.col(0));
+        // temp_matrix = temp_matrix.inverse();
+
+        // Matrix<3, 2, float> TB;
+        // // set [E1 E2] 
+        // TB.set_col(0, varing_position.col(1) - varing_position.col(0));
+        // TB.set_col(1, varing_position.col(2) - varing_position.col(0));
+        // TB = TB * temp_matrix;
+
+        // Matrix3f TBN;
+        // TBN.set_col(0, TB.col(0).normalize());
+        // TBN.set_col(1, TB.col(1).normalize());
+        // TBN.set_col(2, cross(TBN.col(0), TBN.col(1)));
+
+        //Vector3f n = TBN * n_tan;
+
+        Vector3f n = m->normal(uv);
 
         Vector3f l = lightDir.normalize();
         Vector3f v = (eyePos - p).normalize();
@@ -54,7 +83,7 @@ struct GouraudShader : IShader{
 
         float amb = 0.1f;
         float diff = std::max(0.f, l * n);
-        float spec = std::pow(std::max(0.f, h * n), 32);
+        float spec = std::pow(std::max(0.f, h * n), m->specular(uv)[0]);
         
         TGAColor tex = m->diffuse(uv);
 
