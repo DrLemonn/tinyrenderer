@@ -96,6 +96,16 @@ Matrix4f rasterizer::getProjectionMatrix(float eye_fov, float aspect_ratio, floa
     return projection;
 }
 
+Matrix4f rasterizer::getOrthoProjectionMatrix(float l, float r, float b, float t, float n, float f)
+{
+	Matrix4f orthographic;
+
+	orthographic[0] = {2/(r-l), 0.0f, 0.0f, 0.0f};
+	orthographic[1] = {0.0f, 2/(t-b), 0.0f, 0.0f};
+	orthographic[2] = {0.0f, 0.0f, 2/(n-f), -(n + f)/(n - f)};
+	orthographic[3] = {0.0f, 0.0f, 0.0f, 1.0f};
+    return orthographic;
+}
 
 Matrix4f rasterizer::getViewportMatrix(){
 	Matrix4f viewport;

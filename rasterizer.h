@@ -6,6 +6,9 @@
 
 
 extern const float PI;
+extern std::vector<float> shadowDepthBuffer;
+extern const int width;
+extern const int height;
 
 
 struct IShader{
@@ -14,6 +17,38 @@ struct IShader{
     virtual bool fragment(Vector3f bar, TGAColor& color) = 0;
 };
 
+struct ShadowShader : IShader
+{
+    // --- "Uniforms" ---
+    Model* m = nullptr;
+    Matrix4f modelViewMatrix;
+    Matrix4f orthoProjectionMatrix;
+    Matrix4f viewportMatrix;
+
+    // --- "Varying" ---
+    Matrix3f varing_position;
+    Vector4f vertex(int face_index, int vert_index) override {
+        Vector3f v_pos = m->getVertex(face_index, vert_index);
+        varing_position.set_col(vert_index, toVec3(modelViewMatrix * toVec4(v_pos)));
+
+        //varing_intensity[vert_index] = std::max(0.f, normal * lightDir);
+        return viewportMatrix * orthoProjectionMatrix * modelViewMatrix * toVec4(v_pos);
+    }
+
+    bool fragment(Vector3f bar, TGAColor& color) override {
+        Vector3f p = varing_position * bar;
+        
+        color = TGAColor{static_cast<unsigned char>(255 * (p.z/(-10.f))),
+            static_cast<unsigned char>(255 * (p.z/(-10.f))),
+            static_cast<unsigned char>(255 * (p.z/(-10.f))),
+            static_cast<unsigned char>(255 * (p.z/(-10.f)))};
+        return false;
+    }
+
+
+};
+
+
 struct GouraudShader : IShader{
     // --- "Uniforms" ---
     Model* m = nullptr;
@@ -21,6 +56,7 @@ struct GouraudShader : IShader{
     Matrix4f modelViewInverTrans;
     Matrix4f projectionMatrix;
     Matrix4f viewportMatrix;
+    Matrix4f lightMVPMatrix;
     Vector3f lightDir;
     Vector3f eyePos;
 
@@ -30,13 +66,14 @@ struct GouraudShader : IShader{
     Matrix3f varing_position;
     Matrix3f varing_normal;
     Matrix<2, 3, float> varing_uv;
+    Matrix3f varing_lightTrans;
 
     Vector4f vertex(int face_index, int vert_index) override {
         Vector3f v_pos = m->getVertex(face_index, vert_index);
         varing_position.set_col(vert_index, toVec3(modelViewMatrix * toVec4(v_pos)));
         varing_normal.set_col(vert_index, toVec3 (modelViewInverTrans * toVec4(m->getNormal(face_index, vert_index),0.f)));
         varing_uv.set_col(vert_index, m->getuv(face_index, vert_index)); 
-
+        varing_lightTrans.set_col(vert_index, toVec3(lightMVPMatrix * toVec4(v_pos)));
         //varing_intensity[vert_index] = std::max(0.f, normal * lightDir);
         return viewportMatrix * projectionMatrix * modelViewMatrix * toVec4(v_pos);
     }
@@ -47,8 +84,17 @@ struct GouraudShader : IShader{
         Vector3f p = varing_position * bar;
         Vector3f n_model = varing_normal * bar;
         Vector2f uv = varing_uv * bar;
+        Vector3f lp = varing_lightTrans * bar;
+        float visibility = 0.7f;
         
         Vector3f n_tan = m->normal(uv);
+
+
+        // use shadow buffer
+        if(lp.z > shadowDepthBuffer[int(lp.y) * width + int(lp.x)] + 1e-3){
+            visibility = 0.f;
+        }
+
 
         // compute TBN matrix 
         // E1 = AB E2 = AC
@@ -94,7 +140,7 @@ struct GouraudShader : IShader{
         TGAColor tex = m->diffuse(uv);
 
         for(int i : {0, 1, 2}){
-            color[i] = tex[i] * (diff + 0.6 * spec + amb);
+            color[i] = tex[i] * (diff + 0.6 * spec + amb) * (0.3f + visibility);
         }
 
         return false; 
@@ -120,6 +166,7 @@ struct rasterizer{
     Matrix4f lookAt(Vector3f eye_pos, Vector3f centre, Vector3f up);
     Matrix4f getViewportMatrix();
     Matrix4f getProjectionMatrix(float eye_fov, float aspect_ratio, float zNear, float zFar);
+    Matrix4f getOrthoProjectionMatrix(float l, float r, float b, float t, float n, float f);
     void rasterize_triangle(Vector4f a, Vector4f b, Vector4f c, IShader& shader, TGAImage& framebuffer, std::vector<float>& depthbuffer);
     void write_tga_file(std::string filename);
 };
