@@ -107,7 +107,7 @@ Matrix4f rasterizer::getOrthoProjectionMatrix(float l, float r, float b, float t
     return orthographic;
 }
 
-Matrix4f rasterizer::getViewportMatrix(){
+Matrix4f rasterizer::getViewportMatrix(int width, int height){
 	Matrix4f viewport;
 	viewport[0] = {width/2.0f, 0.f, 0.f, width/2.0f};
 	viewport[1] = {0.f, height/2.0f, 0.f, height/2.0f};

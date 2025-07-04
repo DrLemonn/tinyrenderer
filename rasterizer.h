@@ -164,7 +164,7 @@ struct rasterizer{
     void line(int ax, int ay, int bx, int by, TGAColor color);
     Matrix4f getModelMatrix(float angle);
     Matrix4f lookAt(Vector3f eye_pos, Vector3f centre, Vector3f up);
-    Matrix4f getViewportMatrix();
+    Matrix4f getViewportMatrix(int width, int height);
     Matrix4f getProjectionMatrix(float eye_fov, float aspect_ratio, float zNear, float zFar);
     Matrix4f getOrthoProjectionMatrix(float l, float r, float b, float t, float n, float f);
     void rasterize_triangle(Vector4f a, Vector4f b, Vector4f c, IShader& shader, TGAImage& framebuffer, std::vector<float>& depthbuffer);

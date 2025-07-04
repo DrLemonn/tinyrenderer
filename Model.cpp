@@ -68,6 +68,7 @@ void Model::loadObject(std::string filename){
     load_texture("_nm_tangent.tga", normal_img  );
     //load_texture("_nm.tga", normal_img  );
     load_texture("_spec.tga",       specular_img);
+    load_texture("_ao.tga",       ao_img);
 }
 
 TGAColor Model::diffuse(Vector2f uv)
@@ -77,13 +78,18 @@ TGAColor Model::diffuse(Vector2f uv)
 
 TGAColor Model::specular(Vector2f uv)
 {
-    return specular_img.get(std::floor(uv.x * diffuse_img.width()), std::floor(uv.y * diffuse_img.height()));
+    return specular_img.get(std::floor(uv.x * specular_img.width()), std::floor(uv.y * specular_img.height()));
+}
+
+TGAColor Model::ao(Vector2f uv)
+{
+    return ao_img.get(std::floor(uv.x * ao_img.width()), std::floor(uv.y * ao_img.height()));
 }
 
 Vector3f Model::normal(Vector2f uv)
 {      
     Vector3f result;
-    TGAColor n = normal_img.get(std::floor(uv.x * diffuse_img.width()), std::floor(uv.y * diffuse_img.height()));
+    TGAColor n = normal_img.get(std::floor(uv.x * normal_img.width()), std::floor(uv.y * normal_img.height()));
 
     for(int i = 0;i < 3;i++){
         result[2 - i] =  static_cast<float>(n[i])/255.f * 2.f - 1.f;
